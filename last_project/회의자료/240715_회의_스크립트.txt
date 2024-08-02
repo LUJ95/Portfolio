@@ -1,0 +1,15 @@
+2024년 7월 26일 (목) Daily Log
+
+
+    
+3. 의재
+   - 진행현황
+    * 보건, 교육, 상하수도 머신러닝 Raw 데이터 통합 데이터 수정 (교육종합v0.1,v0.2 , 보건종합v0.1, 상하수도종합v0.2, 소멸종합v0.1,0.2)
+    * 머신러닝 밀키트 출시 (machine_learning_base_data_v0.2)
+	(https://github.com/chance6269/Local_Extinction/tree/master/preprocessed/%EC%A2%85%ED%95%A9%ED%8C%8C%EC%9D%BC%EB%93%A4)
+      
+   -  진행계획
+    * - 분류 모델 적용
+          * 부스팅 기법: 앙상블 알고리즘을 사용하여 모델 성능을 향상
+          * 모델 검증 및 선택: RandomizedSearchCV 모듈을 통해 하이퍼파라미터 최적화
+                              K-fold 교차검증을 실시하여 최적 모델을 선택

@@ -1,0 +1,16 @@
+2024년 7월 30일 (화) Daily Log
+
+(주찬)
+	- 진행현황
+		* 전처리 :
+			Label encoding = 시도별 -> (1,2,3... )
+		
+		
+		* 서비스 구축 :
+			- Streamlit에 샘플 모델 탑재
+		
+				1) GradientBoosting
+					- 대기시간이 너무 김.
+	
+	- 진행계획
+		* pickle을 이용한 머신러닝 시간 단축

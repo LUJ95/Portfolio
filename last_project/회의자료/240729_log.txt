@@ -1,0 +1,14 @@
+(의재)
+	- 진행현황
+		* 전처리 : 
+			- Label Encoding : 소멸위험등급 (A ~ D -> 1~4)
+
+		* 모델 구축 : 
+			GradientBoosting 
+				- RandomizedSearchCV 모듈로 하이퍼 파라미터 튜닝
+ 
+		* 발표 내용구상
+		- 아이디어 제공(GradientBoosting머신러닝 설명)
+	- 진행계획
+		* 서비스 구축
+			- streamlit에 샘플 모델 탑재
