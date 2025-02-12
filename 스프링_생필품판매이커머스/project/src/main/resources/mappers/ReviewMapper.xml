@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="kr.co.dong.reviewMapper">
+ <select id="showReview" parameterType="java.lang.Integer" resultType="ReviewVO">
+ select * from review where pno = #{pno} and rdel = 1
+ </select>
+ <insert id="writeReview" parameterType="ReviewVO">
+   INSERT INTO review (pno, cno, cid, rating, rcontext)
+   VALUES (#{pno}, #{cno}, #{cid}, #{rating}, #{rcontext})
+</insert>
+<select id="bringOne" parameterType="java.lang.Integer" resultType="ReviewVO">
+	SELECT * from review where rid=#{rid}
+</select>
+<update id="updateReview" parameterType="ReviewVO">
+	UPDATE review set rating=#{rating}, rcontext=#{rcontext} where rid=#{rid};
+</update>
+<update id="deleteReview" parameterType="java.lang.Integer">
+	UPDATE review set rdel = 0 where rid=#{rid};
+</update>
+<select id="avgReview" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+	select coalesce(avg(rating), 0) as average from review where pno = #{pno} and rdel=1;
+</select>
+<select id="countReview" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+	select coalesce(count(rating), 0) as count from review where pno=#{pno} and rdel=1;
+</select>
+ </mapper>

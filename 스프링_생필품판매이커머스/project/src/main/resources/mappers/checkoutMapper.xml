@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="kr.co.dong.checkoutMapper">
+  
+
+  
+  
+  <select id="Mrevenue" parameterType="java.lang.String" resultType="OrderItemVO">
+ <![CDATA[
+        SELECT odate, pprice
+        FROM orderitem
+        WHERE DATE(odate) >= DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')
+        AND DATE(odate) < DATE_FORMAT(DATE_ADD(CURRENT_DATE, INTERVAL 1 MONTH), '%Y-%m-01');
+    ]]>
+</select>
+
+<select id="getMonthlyRevenue" resultType="OrderItemVO">
+ SELECT 
+       DATE_FORMAT(odate, '%Y-%m') AS month, 
+       sum(DISTINCT ototal) AS revenue
+        FROM orderitem
+        GROUP BY DATE_FORMAT(odate, '%Y-%m')
+        ORDER BY month;
+</select>
+  
+   <select id="getCategory" resultType="OrderItemVO">
+ select pcat, count(pcat) as count from orderitem group by pcat order by pcat;
+ </select>
+  
+  
+  <insert id="purchase" parameterType="OrderItemVO">
+	insert into orderitem (cno, oid, pno, pname, orderquan, pcat, pprice)
+	values(
+	#{cno},
+	#{oid},
+	#{pno}, 
+	#{pname},
+	#{orderquan},
+	#{pcat},
+	#{pprice})
+  </insert>
+   
+<select id="getLastOid" resultType="java.lang.Integer">
+        SELECT IFNULL(MAX(oid), 0) FROM orderitem; 
+    </select>
+
+   <select id="order" parameterType="java.lang.Integer" resultType="OrderItemVO">
+   select * from orderitem where oid=#{oid} 
+  </select>
+
+<update id="up" parameterType="OrderItemVO">
+UPDATE orderitem
+    SET ototal = #{ototal}, ostatus = #{ostatus}, ono=#{ono}
+    WHERE oid = #{oid} 
+</update>
+
+<update id="updateOrder" parameterType="OrderItemVO">
+update orderitem set ostatus=#{ostatus} where oid=#{oid}
+</update>
+
+<select id="orderDistinct" resultType="OrderItemVO">
+SELECT oi.*
+FROM orderitem oi
+JOIN (
+    SELECT oid, MAX(iid) AS iid
+    FROM orderitem
+    GROUP BY oid
+) AS grouped_oi ON oi.iid = grouped_oi.iid order by oi.ostatus desc
+</select>
+
+<select id="loginBringData" resultType="OrderItemVO">
+select * from CUSTOMER 
+right join (select * from orderitem) as grouped on CUSTOMER.cno = grouped.cno
+where grouped.cno=#{cno}
+</select>
+
+<select id="countDeliv" resultType="java.lang.Integer">
+select count(distinct oid) as count from orderitem where ostatus="Pending"
+</select>
+
+<select id="countall" resultType="java.lang.Integer">
+select count(distinct oid) as count from orderitem
+</select>
+
+<select id="Dcount" resultType="java.lang.Integer">
+select count(distinct oid) as Dcount from orderitem where ostatus="On Delivery"
+</select>
+
+<select id="Edcount" resultType="java.lang.Integer">
+select count(distinct oid) as EdCount from orderitem where ostatus="Delivered"
+</select>
+
+<select id="admin_user" resultType="BoardDTO">
+select * from customer;
+</select>
+  
+  <select id="orders" resultType="OrderItemVO">
+   select * from orderitem order by odate desc
+  </select>
+   
+  
+  
+  
+  </mapper>

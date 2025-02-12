@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="kr.co.dong.boardMapper">
+ 	<!-- 로그인 처리를 위한 SQL -->
+  	<select id="login" parameterType="java.util.Map" resultType="java.util.Map">
+  		select *
+  		from CUSTOMER
+  		where cid=#{cid} and cpass=#{cpass}  		
+  	</select>	
+	
+	<!-- 조회수 1 증가하는 SQL "updataReadCnt"-->
+	<update id="updateReadCnt" parameterType="java.lang.Integer">
+		update board
+		set
+		readcnt = readcnt + 1
+		where bno = #{bno}
+	</update>
+	<!-- 글 추가하는 SQL "insert" or "register"-->
+	<insert id="join" parameterType="BoardDTO">
+		insert into customer(cid, cname, cemail, cpass, cgrade, cstatus, cphone, cadd1, cadd2, cadd3, cdateq, cgender)
+		values (#{cid}, #{cname}, #{cemail}, #{cpass}, #{cgrade}, #{cstatus}, #{cphone}, #{cadd1}, #{cadd2}, #{cadd3}, curdate(), #{cgender})
+	</insert>
+	
+	<insert id="productWrite" parameterType="ProductVO">
+		insert into product(pname, bname, pdes, pvol, pprice, pcat, pdel, pqt, preadcnt, pop1, pimg1, pimg2, pimg3, pimg4, pimg5, pimg6, pimg7, pimg8, pimg9, pimg10)
+		values (#{pname}, #{bname}, #{pdes}, #{pvol}, #{pprice}, #{pcat}, #{pdel}, #{pqt}, 0, #{pop1}, #{pimg1}, #{pimg2}, #{pimg3}, #{pimg4}, #{pimg5}, #{pimg6}, #{pimg7}, #{pimg8}, #{pimg9}, #{pimg10})
+	</insert>
+	
+	<select id="productAllList" resultType="ProductVO">
+		select *
+		from product
+		where pdel='G001'
+	</select> 
+	
+	<select id="productByPno" parameterType="java.lang.Integer" resultType="ProductVO">
+		select *
+		from product
+		where pno = #{pno} and pdel='G001'
+	</select>
+	
+	<insert id="orderItemIns" parameterType="OrderItemVO">
+		insert into orderitem(cno, oid, ono, pno, pname, orderquan, pprice, ostatus, pcat, odate, ototal)
+		values (#{cno}, #{oid}, #{ono}, #{pno}, #{pname}, #{orderquan}, #{pprice}, #{ostatus}, #{pcat}, now(), #{ototal})
+	</insert>
+	
+	<delete id="orderDel" parameterType="java.util.Map">
+		delete from orderitem
+		where oid = #{oid} and pno = #{pno}
+	</delete>
+	
+	<select id="orderItemByCno" parameterType="java.lang.Integer" resultType="orderItemVO">
+		select *
+		from orderitem
+		where cno = #{cno}
+	</select>
+	
+	<select id="productCategory" resultType="java.lang.String">
+		select distinct pcat
+		from product
+		order by pcat
+	</select> 
+	
+	<select id="productTop10" resultType="ProductVO">
+		select *
+		from product
+		where pdel = 'G001'
+		order by preadcnt desc
+		limit 10
+	</select>
+	
+	<update id="productUpdateReadcnt" parameterType="java.lang.Integer">
+		update product
+		set
+		preadcnt = preadcnt + 1
+		where pno = #{pno}
+	</update>
+	
+	<insert id="addCartItem" parameterType="CartItemVO">
+		insert into cart_item (cno, pno, cart_quant, pprice, cart_date)
+		values (#{cno}, #{pno}, #{cartQuant}, #{pprice}, now())
+	</insert>
+	
+	<select id="customerByCno" parameterType="java.lang.Integer" resultType="UserVO">
+		select *
+		from customer
+		where cno = #{cno}
+	</select>
+	
+	<select id="customerByID" parameterType="java.lang.String" resultType="UserVO">
+		select *
+		from customer
+		where cid = #{userID}
+	</select>
+	
+	<select id="getLastOid" resultType="java.lang.Integer">
+		select ifnull(max(oid), 0)
+		from orderitem
+	</select>
+	
+	<select id="orderItemByOidAndPno" parameterType="java.util.Map" resultType="OrderItemVO">
+		select *
+		from orderitem
+		where oid = #{oid} and pno = #{pno}
+	</select>
+	
+	<select id="orderPageList" parameterType="java.util.Map" resultType="OrderItemVO">
+		select *
+		from orderitem
+		where cno = #{cno}
+		limit #{start}, #{pageSize}
+	</select>
+	
+  	<!--                                                         -->
+  	<!-- min -->
+  	<select id="adminList_r2" parameterType="java.util.Map"
+		resultType="ProductVO">
+		SELECT *
+		FROM product
+		WHERE 1=1
+		<if test="cate1 != null and cate1 != 'default'">
+			AND pvol = #{cate1}
+		</if>
+		<if test="cate2 != null and cate2 != 'default'">
+			AND pcat = #{cate2}
+		</if>
+		<if test="cate3 != null and cate3 != 'default'">
+			AND pdel = #{cate3}
+		</if>
+	</select>
+  	<!-- paging list -->
+  	  	<select id="list" parameterType="java.util.Map" resultType="ProductVO">
+     SELECT *
+      FROM product
+      
+      order by pno
+      LIMIT #{start}, #{pageSIZE}
+  </select>
+  <!-- pdel change g002 -->
+  	  	<update id="updatePdel" parameterType="java.util.List">
+    	 UPDATE product
+  		 SET pdel = 'G002'
+   		 WHERE pno IN 
+   		 <foreach collection="list" item="product" open="(" separator="," close=")">
+        #{product.pno}
+         </foreach>
+		</update>
+  	
+  	
+  	
+  	      <delete id="deleteProducts">
+        DELETE FROM product
+        WHERE pno IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    	<!-- product status change for admin list to pdel = g001 -->
+  	<update id="updatePdel_1" parameterType="java.util.List">
+    UPDATE product
+    SET pdel = 'G001'
+    WHERE pno IN 
+    	<foreach collection="list" item="product" open="(" separator="," close=")">
+      	  #{product.pno}
+    	</foreach>
+	</update>
+    
+     <update id="updatePdelToG003">
+        UPDATE product_table
+        SET pdel = 'G003'
+        WHERE pno IN
+        <foreach item="productId" collection="list" open="(" separator="," close=")">
+            #{productId}
+        </foreach>
+        AND pqt = 0
+    </update>
+  	<select id="product_totalRecord" resultType="java.lang.Integer">
+  	select count(*)
+  	
+  	from product
+  	
+  	</select>
+  	<resultMap id="NoticeResultMap" type="NoticeVO">
+        <id property="eno" column="eno" />
+        <result property="ntitle" column="ntitle" />
+        <result property="ncontent" column="ncontent" />
+        <result property="ndate" column="ndate" />
+        <result property="nimg" column="nimg" />
+    </resultMap>
+    
+	<!--  공지사항 수정 -->
+	<update id="Notice_Update" parameterType="NoticeVO" >
+    UPDATE notice
+    SET 
+        ntitle = #{ntitle},
+        ncontent = #{ncontent},
+        ndate = curdate(),
+        nimg = #{nimg}
+    WHERE eno = #{eno}
+	</update>
+
+
+	
+	<!-- 공지사항 삽입 -->
+    <insert id="insertNotice" parameterType="NoticeVO">
+        INSERT INTO notice (ntitle, ncontent, ndate, nimg)
+        VALUES (#{ntitle}, #{ncontent}, NOW(), #{nimg})
+    </insert>
+
+    <select id="getAllNotices" resultMap="NoticeResultMap">
+        SELECT eno, ntitle, ncontent, ndate, nimg
+        FROM notices
+        ORDER BY eno DESC
+    </select> 
+  	
+  	<!-- 기존 추가 notice 추가문 -->
+
+  	<!--  notice 추가 upsert 문으로 -->
+<insert id="eventpageForm" parameterType="NoticeVO">
+    INSERT INTO notice (ntitle, ncontent, ndate, nimg)
+    VALUES (#{ntitle}, #{ncontent}, NOW(), #{nimg})
+  <!--   ON DUPLICATE KEY UPDATE 
+        ncontent = #{ncontent}, 
+        ndate = NOW(), 
+        nimg = #{nimg}; -->
+</insert>
+
+  	<select id="noticelist" resultType="NoticeVO">
+		select *
+		from notice
+		ORDER BY eno DESC
+	</select>
+	
+  	    <select id="getNoticeById" parameterType="java.lang.Integer" resultType="NoticeVO">
+        SELECT * 
+        FROM notice 
+        WHERE eno = #{eno}
+    </select>
+  	
+  	<select id="getLatestNotice" resultType="NoticeVO">
+    SELECT  ntitle, ncontent, ndate, nimg 
+    FROM notice 
+    ORDER BY ndate DESC 
+    LIMIT 1
+</select>
+  	
+  	<select id="getProduct_detail" parameterType="java.lang.Integer" resultType="ProductVO">
+  	select * 
+  	from product
+  	 where pno = #{pno}
+  	
+  	</select>
+  	
+  	
+  	
+  	 <!-- 상품 정보 업데이트 -->
+    <update id="product_Update" parameterType="ProductVO">
+        UPDATE product
+        SET pname = #{pname},
+            bname = #{bname},
+            pdes = #{pdes},
+            pvol = #{pvol},
+            pprice = #{pprice},
+            pcat = #{pcat},
+            pdel = #{pdel},
+            pqt = #{pqt},
+            preadcnt = 0,
+            pop1 = #{pop1},
+            pimg1 = #{pimg1},
+            pimg2 = #{pimg2},
+            pimg3 = #{pimg3},
+            pimg4 = #{pimg4},
+            pimg5 = #{pimg5},
+            pimg6 = #{pimg6},
+            pimg7 = #{pimg7},
+            pimg8 = #{pimg8},
+            pimg9 = #{pimg9},
+            pimg10 = #{pimg10}
+        WHERE pno = #{pno}
+    </update>
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  </mapper>
+  
+  
+  
+  
+  
+  
+  
+  
+  
